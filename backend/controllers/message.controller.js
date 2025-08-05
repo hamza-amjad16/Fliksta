@@ -9,7 +9,7 @@ export const sendMessage = async (req, res) => {
     const { message } = req.body;
 
     let conversation = await Conversation.findOne({
-      participants: { $all: { senderId, receiverId } },
+      participants: { $all: [ senderId, receiverId ] },
     });
     // establish the conversation if not started yet
     if (!conversation) {
@@ -44,7 +44,7 @@ export const getMessage = async (req, res) => {
         const receiverId = req.params.id
 
         // jin 2 ka darmiyan bat hui un ka messages
-        const conversation = await Conversation.find({
+        const conversation = await Conversation.findOne({
             participants: {$all: [senderId, receiverId]}
         })
         if(!conversation) return res.status(200).json({success: true, messages: []})

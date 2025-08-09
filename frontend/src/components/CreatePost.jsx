@@ -8,6 +8,8 @@ import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
 import { POST_API } from "@/lib/const";
+import { useDispatch, useSelector } from "react-redux";
+import { setPosts } from "@/redux/postSlice";
 
 const CreatePost = ({ open, setOpen }) => {
   const imageRef = useRef(); //Button ka onclick sa input ko trigger kr rhay hai
@@ -15,6 +17,10 @@ const CreatePost = ({ open, setOpen }) => {
   const [caption, setCaption] = useState("");
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
+  const {user} = useSelector(store => store.auth)
+  const {posts} = useSelector(store => store.post)
+
+  const dispatch = useDispatch()
 
   const filechangeHandler = async (e) => {
     const file = e.target.files?.[0];
@@ -40,9 +46,9 @@ const CreatePost = ({ open, setOpen }) => {
         withCredentials: true,
       });
       if (res.data.success) {
+        dispatch(setPosts([res.data.post,...posts])) // new post first aye 
         toast.success(res.data.message);
-        setCaption("")
-        setImagePreview("")
+        setOpen(false)
       }
     } catch (error) {
       console.log("Create Post handler", error);
@@ -59,12 +65,12 @@ const CreatePost = ({ open, setOpen }) => {
         </DialogHeader>
         <div className="flex gap-3 items-center">
           <Avatar>
-            <AvatarImage src="" alt="image" />
+            <AvatarImage src={user?.profilePicture} alt="image" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           <div>
-            <h1 className="font-semibold text-xs">Username</h1>
-            <span className="text-gray-600 text-xs">Bio here...</span>
+            <h1 className="font-semibold text-xs">{user?.username}</h1>
+            <span className="text-gray-600 text-xs">{user?.bio}</span>
           </div>
         </div>
         <Textarea

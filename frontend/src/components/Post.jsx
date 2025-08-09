@@ -10,10 +10,12 @@ import {
 } from "lucide-react";
 import { Button } from "./ui/button";
 import CommentDialog from "./CommentDialog";
+import { useSelector } from "react-redux";
 
-const Post = ({post}) => {
+const Post = ({ post }) => {
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
+  const { user } = useSelector((store) => store.auth);
   const changeHandler = (e) => {
     const inputText = e.target.value;
     // condition check ka white space na ho
@@ -47,9 +49,13 @@ const Post = ({post}) => {
             <Button variant={"ghost"} className=" cursor-pointer w-fit">
               Add to Favourites
             </Button>
-            <Button variant={"ghost"} className=" cursor-pointer w-fit ">
-              Delete
-            </Button>
+            {
+              user && user?._id === post?.author._id && ( // jo logged in user ho us ke post per delete aye sirf
+                <Button variant={"ghost"} className=" cursor-pointer w-fit ">
+                  Delete
+                </Button>
+              ) 
+            }
           </DialogContent>
         </Dialog>
       </div>

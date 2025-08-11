@@ -14,8 +14,9 @@ import axios from "axios";
 import { USER_API } from "@/lib/const";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setAuthUser } from "@/redux/authSlice";
+import { setAuthUser } from "@/redux/authSlice.js";
 import CreatePost from "./CreatePost";
+import { setPosts, setSelectedPost } from "@/redux/postSlice.js";
 
 const LeftSideBar = () => {
   const navigate = useNavigate();
@@ -29,6 +30,8 @@ const LeftSideBar = () => {
       });
       if (res.data.success) {
         dispatch(setAuthUser(null));
+        dispatch(setSelectedPost(null))
+        dispatch(setPosts[null])
         navigate("/login");
         toast.success(res.data.message);
       }

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import {
@@ -14,17 +14,23 @@ import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import axios from "axios";
 import { POST_API } from "@/lib/const";
-import { setPosts } from "@/redux/postSlice";
+import { setPosts, setSelectedPost } from "@/redux/postSlice";
+import { Badge } from "./ui/badge";
 
 const Post = ({ post }) => {
   const [text, setText] = useState("");
   const [open, setOpen] = useState(false);
   const { user } = useSelector((store) => store.auth);
-  const { posts } = useSelector((store) => store.post);
+  const { posts, selectedPost } = useSelector((store) => store.post);
   const [liked, setLiked] = useState(post.likes.includes(user?._id) || false);
   const [postLikes, setPostLikes] = useState(post.likes.length);
-  const [comment, setComment] = useState(post.comments)
+  const [comment, setComment] = useState(post.comments);
   const dispatch = useDispatch();
+
+  useEffect(() => {
+  setComment(post.comments);
+}, [post.comments]);
+
   const changeHandler = (e) => {
     const inputText = e.target.value;
     // condition check ka white space na ho
@@ -66,28 +72,38 @@ const Post = ({ post }) => {
   };
   const commentHandler = async () => {
     try {
-      const res = await axios.post(`${POST_API}/${post._id}/comment` , {text} , {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        withCredentials: true
-      })
-      if(res.data.success){
-        toast.success(res.data.message)
-        const updatedCommentData = [...comment, res.data.comment]
-        setComment(updatedCommentData)
+      const res = await axios.post(
+        `${POST_API}/${post._id}/comment`,
+        { text },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      if (res.data.success) {
+        toast.success(res.data.message);
+        const updatedCommentData = [...comment, res.data.comment];
+        setComment(updatedCommentData);
 
-        const updatedPostData = posts.map(p => 
-          p.id === post.id ? {...p , comment: updatedCommentData} : p
-        )
-        dispatch(setPosts(updatedPostData))
-        setText("")
+        const updatedPostData = posts.map((p) =>
+          p._id === post._id ? { ...p, comments: updatedCommentData } : p
+        );
+        dispatch(setPosts(updatedPostData));
+        // 🔹 Yahan selectedPost ko update karo / real time updated hoga
+        dispatch(
+          setSelectedPost({
+            ...selectedPost,
+            comments: updatedCommentData,
+          })
+        );
+        setText("");
       }
     } catch (error) {
       console.log("Comment error", error);
-      
     }
-  }
+  };
   const deletePostHandler = async () => {
     try {
       const res = await axios.delete(`${POST_API}/delete/${post?._id}`, {
@@ -113,7 +129,10 @@ const Post = ({ post }) => {
             <AvatarImage src={post.author?.profilePicture} alt="post_image" />
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
+          <div className="flex items-center gap-3">
           <h1>{post.author?.username}</h1>
+          {user?._id === post?.author?._id && <Badge variant={"secondary"}>Author</Badge> }
+          </div>
         </div>
         <Dialog>
           <DialogTrigger asChild>
@@ -167,7 +186,10 @@ const Post = ({ post }) => {
             />
           )}
           <MessageCircle
-            onClick={() => setOpen(true)}
+            onClick={() => {
+              dispatch(setSelectedPost(post));
+              setOpen(true);
+            }}
             className="cursor-pointer hover:text-gray-600"
           />
           <Send className="cursor-pointer hover:text-gray-600" />
@@ -180,7 +202,10 @@ const Post = ({ post }) => {
         {post.caption}
       </p>
       <span
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          dispatch(setSelectedPost(post));
+          setOpen(true);
+        }}
         className="cursor-pointer text-sm text-gray-400"
       >
         View all {comment.length} Comments
@@ -194,7 +219,14 @@ const Post = ({ post }) => {
           onChange={changeHandler}
           className="outline-none text-sm w-full"
         />
-        {text && <span onClick={commentHandler} className="text-[#3BADF8]">Post</span>}
+        {text && (
+          <span
+            onClick={commentHandler}
+            className="cursor-pointer text-[#3BADF8]"
+          >
+            Post
+          </span>
+        )}
       </div>
     </div>
   );

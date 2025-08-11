@@ -177,6 +177,8 @@ export const addComment = async (req, res) => {
     post.comments.push(comment._id);
     await post.save();
 
+    
+
     return res.status(201).json({
       message: "Comment Added",
       comment,

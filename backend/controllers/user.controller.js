@@ -180,7 +180,7 @@ export const getSuggestedUser = async (req, res) => {
 
     return res.status(200).json({
       success: false,
-      suggestedUser,
+      users: suggestedUser,
     });
   } catch (error) {
     console.log("Get suggested User", error);

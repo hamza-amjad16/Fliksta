@@ -22,7 +22,7 @@ const LeftSideBar = () => {
   const navigate = useNavigate();
   const { user } = useSelector((store) => store.auth);
   const dispatch = useDispatch();
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const logoutHandler = async () => {
     try {
       const res = await axios.get(`${USER_API}/logout`, {
@@ -30,23 +30,25 @@ const LeftSideBar = () => {
       });
       if (res.data.success) {
         dispatch(setAuthUser(null));
-        dispatch(setSelectedPost(null))
-        dispatch(setPosts[null])
-        navigate("/login");
+        dispatch(setSelectedPost(null));
+        dispatch(setPosts(null));
         toast.success(res.data.message);
+        navigate("/login");
       }
     } catch (error) {
       toast.error(error.response.data.message);
     }
   };
- 
+
   const sidebarHandler = async (Texttype) => {
     if (Texttype === "Logout") {
       logoutHandler();
-    } else if(Texttype === "Create") {
-      setOpen(true)
-    } else if(Texttype === "Profile"){
-      navigate(`/profile/${user?._id}`)
+    } else if (Texttype === "Create") {
+      setOpen(true);
+    } else if (Texttype === "Profile") {
+      navigate(`/profile/${user?._id}`);
+    } else if(Texttype === "Home"){
+      navigate("/")
     }
   };
 
@@ -87,7 +89,7 @@ const LeftSideBar = () => {
           })}
         </div>
       </div>
-      <CreatePost open={open} setOpen ={setOpen} />
+      <CreatePost open={open} setOpen={setOpen} />
     </div>
   );
 };

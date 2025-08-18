@@ -16,7 +16,7 @@ const useGetSuggestedUsers = () => {
           dispatch(setSuggestedUsers(res.data.users));
         }
       } catch (error) {
-        console.log("Fetch All posts error", error);
+        console.log("Fetch All users", error);
       }
     };
     fetchSuggestedUsers();

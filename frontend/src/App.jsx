@@ -4,6 +4,7 @@ import Login from "./components/Login";
 import Home from "./components/Home";
 import MainLayout from "./components/MainLayout";
 import Profile from "./components/Profile";
+import EditProfile from "./components/EditProfile";
 
 function App() {
   return (
@@ -13,6 +14,7 @@ function App() {
           <Route path="/" element={<MainLayout />}>
             <Route index element={<Home />} />
             <Route path="profile/:id" element={<Profile />} />
+            <Route path="account/edit" element={<EditProfile />} />
           </Route>
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

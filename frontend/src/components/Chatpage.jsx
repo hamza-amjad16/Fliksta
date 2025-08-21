@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { setSelectedUser } from "@/redux/authSlice";
@@ -6,13 +6,41 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { MessageCircleCode } from "lucide-react";
 import Messages from "./Messages";
+import axios from "axios";
+import { MESSAGE_API } from "@/lib/const";
+import { setMessages } from "@/redux/chatSlice";
 
 const Chatpage = () => {
+  const [textMessage, setTextMessage] = useState("");
   const { user, suggestedUsers, selectedUser } = useSelector(
     (store) => store.auth
   );
-  const isOnline = true;
+  const { onlineUsers, messages } = useSelector((store) => store.chat);
   const dispatch = useDispatch();
+
+  const sendMessageHandler = async (receiverId) => {
+    try {
+      const res = await axios.post(`${MESSAGE_API}/send/${receiverId}`, {textMessage} ,{
+        headers: {
+          "Content-Type": "application/json"
+        },
+        withCredentials: true
+      });
+      if(res.data.success){
+        dispatch(setMessages([...messages, res.data.newMessage]))
+        setTextMessage("")
+      }
+    } catch (error) {
+      console.log("send Message", error);
+    }
+  };
+
+  useEffect(() => {
+    // jaisa hi page left kra ga to selectedUser hat jaye ga
+    return () => {
+      dispatch(setSelectedUser(null))
+    }
+  }, [])
 
   return (
     <div className="flex ml-[16%] h-screen ">
@@ -21,6 +49,7 @@ const Chatpage = () => {
         <hr className="mb-4 border-gray-300 " />
         <div className="overflow-y-auto h-[80vh]">
           {suggestedUsers.map((suggesstedUser) => {
+            const isOnline = onlineUsers.includes(suggesstedUser?._id);
             return (
               <div
                 onClick={() => dispatch(setSelectedUser(suggesstedUser))}
@@ -56,18 +85,22 @@ const Chatpage = () => {
               <span>{selectedUser?.username}</span>
             </div>
           </div>
-        <Messages selectedUser={selectedUser}/>
+          <Messages selectedUser={selectedUser} />
           <div className="flex items-center p-4 border-t border-t-gray-300">
             <Input
+              value={textMessage}
+              onChange={(e) => setTextMessage(e.target.value)}
               type="text"
               className="flex-1 mr-2 focus-visible:ring-transparent"
               placeholder="Messages..."
             />
-            <Button>Send</Button>
+            <Button onClick={() => sendMessageHandler(selectedUser?._id)}>
+              Send
+            </Button>
           </div>
         </section>
       ) : (
-        <div className="flex flex-col items-center mx-auto">
+        <div className="flex flex-col justify-center items-center mx-auto">
           <MessageCircleCode className="w-32 h-32 my-4" />
           <h1 className="font-medium text-xl">Your messages</h1>
           <span>Send a message to start conversation</span>

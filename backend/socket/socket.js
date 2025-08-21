@@ -17,6 +17,8 @@ const io = new Server(server, {
 //  -> matlab jitni socket id utna users online ya app sa connected hai
 const userSocketMap = {};
 
+export const getRecevierSocketId = (receiverId) => userSocketMap[receiverId]
+
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
   if (userId) {

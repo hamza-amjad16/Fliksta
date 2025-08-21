@@ -1,12 +1,14 @@
 import { Conversation } from "../models/conversation.model.js";
 import { Message } from "../models/message.model.js";
+import { getRecevierSocketId, io } from "../socket/socket.js";
 
 // For Chat
 export const sendMessage = async (req, res) => {
   try {
     const senderId = req.id;
     const receiverId = req.params.id;
-    const { message } = req.body;
+    const { textMessage: message } = req.body;
+    console.log(message);
 
     let conversation = await Conversation.findOne({
       participants: { $all: [ senderId, receiverId ] },
@@ -27,7 +29,10 @@ export const sendMessage = async (req, res) => {
     if (newMessage) conversation.messages.push(newMessage._id);
     await Promise.all([conversation.save(), newMessage.save()]);
     // implement socket.io   one-to-one
-
+    const receiverSocketId = getRecevierSocketId(receiverId)
+    if(receiverSocketId){
+      io.to(receiverSocketId).emit('newMessage', newMessage)
+    }
 
     return res.status(201).json({
         success: true,

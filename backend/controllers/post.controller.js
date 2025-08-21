@@ -3,6 +3,7 @@ import cloudinary from "../utils/cloudinary.js";
 import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
 import { Comment } from "../models/comment.model.js";
+import { getRecevierSocketId, io } from "../socket/socket.js";
 
 export const addnewPost = async (req, res) => {
   try {
@@ -118,6 +119,23 @@ export const LikePost = async (req, res) => {
     await post.save();
 
     // implement socket.io for real time notification
+    const user = await User.findById(LikekrnawalaUserkiId).select(
+      "username profilePicture"
+    );
+    // agr khud ke post like kra to notification bhejna ke zaroorat nhi
+    const PostOwnerId = post.author.toString();
+    if (PostOwnerId !== LikekrnawalaUserkiId) {
+      // emit a notification event
+      const notification = {
+        type: "like",
+        userId: LikekrnawalaUserkiId,
+        userDetails: user,
+        postId,
+        message: "Your post is liked",
+      };
+      const postOwnerSocketId = getRecevierSocketId(PostOwnerId);
+      io.to(postOwnerSocketId).emit("notification", notification);
+    }
 
     return res
       .status(200)
@@ -142,6 +160,23 @@ export const DisLikePost = async (req, res) => {
     await post.save();
 
     // implement socket.io for real time notification
+      const user = await User.findById(LikekrnawalaUserkiId).select(
+      "username profilePicture"
+    );
+    // agr khud ke post like kra to notification bhejna ke zaroorat nhi
+    const PostOwnerId = post.author.toString();
+    if (PostOwnerId !== LikekrnawalaUserkiId) {
+      // emit a notification event
+      const notification = {
+        type: "dislike",
+        userId: LikekrnawalaUserkiId,
+        userDetails: user,
+        postId,
+        message: "Your post is Disliked",
+      };
+      const postOwnerSocketId = getRecevierSocketId(PostOwnerId);
+      io.to(postOwnerSocketId).emit("notification", notification);
+    }
 
     return res
       .status(200)
@@ -167,17 +202,15 @@ export const addComment = async (req, res) => {
       text,
       author: CommentUser,
       post: postId,
-    })
+    });
 
     await comment.populate({
-       path: "author",
+      path: "author",
       select: "username profilePicture",
-    })
+    });
 
     post.comments.push(comment._id);
     await post.save();
-
-    
 
     return res.status(201).json({
       message: "Comment Added",
@@ -226,21 +259,21 @@ export const deletePost = async (req, res) => {
         .status(403)
         .json({ message: "Unauthorized User", success: false });
 
-      // delete Post
-      await Post.findByIdAndDelete(postId)
+    // delete Post
+    await Post.findByIdAndDelete(postId);
 
-      // remove the postId from user
-      let user = await User.findById(authorId)
-      user.posts = user.posts.filter(id => id.toString() !== postId) // sari post da do bus delete ka aliwa
-      await user.save()
+    // remove the postId from user
+    let user = await User.findById(authorId);
+    user.posts = user.posts.filter((id) => id.toString() !== postId); // sari post da do bus delete ka aliwa
+    await user.save();
 
-      // delete wo comments jo delete post per huay whay hai
-      await Comment.deleteMany({post: postId});
+    // delete wo comments jo delete post per huay whay hai
+    await Comment.deleteMany({ post: postId });
 
-      return res.status(200).json({
-        success: true,
-        message: "Post deleted"
-      })
+    return res.status(200).json({
+      success: true,
+      message: "Post deleted",
+    });
   } catch (error) {
     console.log("Delete Post error", error);
   }
@@ -248,36 +281,36 @@ export const deletePost = async (req, res) => {
 
 export const BookmarkPost = async (req, res) => {
   try {
-    const postId = req.params.id
-    const authorId = req.id
-    const post = await Post.findById(postId)
-    if(!post)  return res.status(404).json({
+    const postId = req.params.id;
+    const authorId = req.id;
+    const post = await Post.findById(postId);
+    if (!post)
+      return res.status(404).json({
         success: false,
-        message: "Post not found"
-      })
+        message: "Post not found",
+      });
 
-      const user = await User.findById(authorId)
-      if(user.bookmarks.includes(post._id)){
-        // Already bookmarked / remove from bookmarked
-        await user.updateOne({$pull : {bookmarks: post._id}})
-        await user.save()
-        return res.status(200).json({
-          type:"unsaved",
-          message: "Post removed from bookmarked",
-          success: true
-        })
-      } else {
-        // Not bookmarked / Add to bookmarked
-        await user.updateOne({$addToSet : {bookmarks: post._id}})
-         await user.save()
-        return res.status(200).json({
-          type:"saved",
-          message: "Post bookmarked",
-          success: true
-        })
-      }
+    const user = await User.findById(authorId);
+    if (user.bookmarks.includes(post._id)) {
+      // Already bookmarked / remove from bookmarked
+      await user.updateOne({ $pull: { bookmarks: post._id } });
+      await user.save();
+      return res.status(200).json({
+        type: "unsaved",
+        message: "Post removed from bookmarked",
+        success: true,
+      });
+    } else {
+      // Not bookmarked / Add to bookmarked
+      await user.updateOne({ $addToSet: { bookmarks: post._id } });
+      await user.save();
+      return res.status(200).json({
+        type: "saved",
+        message: "Post bookmarked",
+        success: true,
+      });
+    }
   } catch (error) {
-    console.log("BookmarkPost error",error);
-    
+    console.log("BookmarkPost error", error);
   }
-}
+};

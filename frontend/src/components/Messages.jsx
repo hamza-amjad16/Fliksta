@@ -2,9 +2,12 @@ import React from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import useGetAllMessages from "@/hooks/useGetAllMessage";
 
 const Messages = ({ selectedUser }) => {
-    
+  useGetAllMessages();
+  const { messages } = useSelector((store) => store.chat);
   return (
     <div className="overflow-y-auto flex-1 p-4">
       <div className="flex justify-center">
@@ -14,21 +17,22 @@ const Messages = ({ selectedUser }) => {
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           <span>{selectedUser?.username}</span>
-          <Link to={`/profile/${selectedUser?._id}`}><Button variant={"secondary"} className="h-8 my-2">View Profile</Button></Link>
+          <Link to={`/profile/${selectedUser?._id}`}>
+            <Button variant={"secondary"} className="h-8 my-2">
+              View Profile
+            </Button>
+          </Link>
         </div>
       </div>
       <div className="flex flex-col gap-3">
-        {
-            [1,2,3,4].map((msg) => {
-                return (
-                    <div className={`flex `}>
-                        <div>
-                            {msg}
-                        </div>
-                    </div>
-                )
-            })
-        }
+        {messages &&
+          messages.map((msg) => {
+            return (
+              <div className={`flex `}>
+                <div>{msg.message}</div>
+              </div>
+            );
+          })}
       </div>
     </div>
   );

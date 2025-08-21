@@ -49,6 +49,8 @@ const LeftSideBar = () => {
       navigate(`/profile/${user?._id}`);
     } else if(Texttype === "Home"){
       navigate("/")
+    } else if(Texttype === "Messages"){
+      navigate("/chat")
     }
   };
 

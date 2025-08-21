@@ -21,6 +21,6 @@ const useGetAllMessages = () => {
       }
     };
     fetchAllMessages();
-  }, []);
+  }, [selectedUser]);
 };
 export default useGetAllMessages;

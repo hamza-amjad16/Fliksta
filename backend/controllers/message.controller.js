@@ -8,7 +8,6 @@ export const sendMessage = async (req, res) => {
     const senderId = req.id;
     const receiverId = req.params.id;
     const { textMessage: message } = req.body;
-    console.log(message);
 
     let conversation = await Conversation.findOne({
       participants: { $all: [ senderId, receiverId ] },
@@ -51,7 +50,7 @@ export const getMessage = async (req, res) => {
         // jin 2 ka darmiyan bat hui un ka messages
         const conversation = await Conversation.findOne({
             participants: {$all: [senderId, receiverId]}
-        })
+        }).populate("messages")
         if(!conversation) return res.status(200).json({success: true, messages: []})
 
          return res.status(200).json({

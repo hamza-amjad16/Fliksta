@@ -28,8 +28,8 @@ const Post = ({ post }) => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-  setComment(post.comments);
-}, [post.comments]);
+    setComment(post.comments);
+  }, [post.comments]);
 
   const changeHandler = (e) => {
     const inputText = e.target.value;
@@ -121,6 +121,20 @@ const Post = ({ post }) => {
       toast.error(error.response.data.message);
     }
   };
+
+  const BookmarkHandler = async () => {
+    try {
+      const res = await axios.get(`${POST_API}/${post?._id}/bookmark`, {
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      toast.error(response.error.data.message);
+      console.log("Bookmark error", error);
+    }
+  };
   return (
     <div className="my-8 w-full max-w-sm mx-auto">
       <div className="flex items-center justify-between">
@@ -130,8 +144,10 @@ const Post = ({ post }) => {
             <AvatarFallback>CN</AvatarFallback>
           </Avatar>
           <div className="flex items-center gap-3">
-          <h1>{post.author?.username}</h1>
-          {user?._id === post?.author?._id && <Badge variant={"secondary"}>Author</Badge> }
+            <h1>{post.author?.username}</h1>
+            {user?._id === post?.author?._id && (
+              <Badge variant={"secondary"}>Author</Badge>
+            )}
           </div>
         </div>
         <Dialog>
@@ -139,12 +155,15 @@ const Post = ({ post }) => {
             <MoreHorizontal className="cursor-pointer" />
           </DialogTrigger>
           <DialogContent className="flex flex-col items-center text-sm text-center">
-            <Button
-              variant={"ghost"}
-              className="font-bold cursor-pointer w-fit text-[#ED4956]"
-            >
-              UnFollow
-            </Button>
+            {post?.author?._id !== user?._id && (
+              <Button
+                variant={"ghost"}
+                className="font-bold cursor-pointer w-fit text-[#ED4956]"
+              >
+                UnFollow
+              </Button>
+            )}
+
             <Button variant={"ghost"} className=" cursor-pointer w-fit">
               Add to Favourites
             </Button>
@@ -194,7 +213,10 @@ const Post = ({ post }) => {
           />
           <Send className="cursor-pointer hover:text-gray-600" />
         </div>
-        <Bookmark className="cursor-pointer hover:text-gray-600" />
+        <Bookmark
+          onClick={BookmarkHandler}
+          className="cursor-pointer hover:text-gray-600"
+        />
       </div>
       <span className="font-medium block mb-2 ">{postLikes} likes</span>
       <p>

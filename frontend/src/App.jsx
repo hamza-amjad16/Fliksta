@@ -12,10 +12,11 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSocket } from "./redux/socketSlice";
 import { setOnlineUsers } from "./redux/chatSlice";
 import { setlikeNotification } from "./redux/rtnSlice";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   const { user } = useSelector((store) => store.auth);
-  const {socket} = useSelector((store) => store.socketio)
+  const { socket } = useSelector((store) => store.socketio);
   const dispatch = useDispatch();
   useEffect(() => {
     if (user) {
@@ -32,8 +33,8 @@ function App() {
       });
 
       socketio.on("notification", (notification) => {
-        dispatch(setlikeNotification(notification))
-      })
+        dispatch(setlikeNotification(notification));
+      });
 
       // cleanup
       return () => {
@@ -49,12 +50,20 @@ function App() {
     <>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<MainLayout />}>
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <MainLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<Home />} />
             <Route path="profile/:id" element={<Profile />} />
             <Route path="account/edit" element={<EditProfile />} />
             <Route path="chat" element={<Chatpage />} />
           </Route>
+
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
         </Routes>

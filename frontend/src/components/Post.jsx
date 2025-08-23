@@ -16,6 +16,7 @@ import axios from "axios";
 import { POST_API } from "@/lib/const";
 import { setPosts, setSelectedPost } from "@/redux/postSlice";
 import { Badge } from "./ui/badge";
+import { Link } from "react-router-dom";
 
 const Post = ({ post }) => {
   const [text, setText] = useState("");
@@ -31,6 +32,7 @@ const Post = ({ post }) => {
     setComment(post.comments);
   }, [post.comments]);
 
+   
   const changeHandler = (e) => {
     const inputText = e.target.value;
     // condition check ka white space na ho
@@ -131,7 +133,7 @@ const Post = ({ post }) => {
         toast.success(res.data.message);
       }
     } catch (error) {
-      toast.error(response.error.data.message);
+      toast.error(error.response.data.message);
       console.log("Bookmark error", error);
     }
   };
@@ -139,10 +141,12 @@ const Post = ({ post }) => {
     <div className="my-8 w-full max-w-sm mx-auto">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Avatar>
-            <AvatarImage src={post.author?.profilePicture} alt="post_image" />
-            <AvatarFallback>CN</AvatarFallback>
-          </Avatar>
+          <Link to={`/profile/${post.author?._id}`}>
+            <Avatar>
+              <AvatarImage src={post.author?.profilePicture} alt="post_image" />
+              <AvatarFallback>CN</AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="flex items-center gap-3">
             <h1>{post.author?.username}</h1>
             {user?._id === post?.author?._id && (
@@ -213,10 +217,10 @@ const Post = ({ post }) => {
           />
           <Send className="cursor-pointer hover:text-gray-600" />
         </div>
-        <Bookmark
-          onClick={BookmarkHandler}
-          className="cursor-pointer hover:text-gray-600"
-        />
+          <Bookmark
+            onClick={BookmarkHandler}
+            className="cursor-pointer"
+          />
       </div>
       <span className="font-medium block mb-2 ">{postLikes} likes</span>
       <p>

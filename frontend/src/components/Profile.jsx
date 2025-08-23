@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
-import useGetUserProfile from "@/hooks/useGetUserProfile";
+import useGetUserProfile from "../hooks/useGetUserProfile";
+import useFollowUnfollow from "../hooks/useGetFollowUnfollow";
 import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Button } from "./ui/button";
@@ -15,7 +16,7 @@ const Profile = () => {
   const { userProfile, user } = useSelector((store) => store.auth);
 
   const isLogged = user?._id === userProfile?._id;
-  const follow = false;
+  const { handleFollowUnfollow } = useFollowUnfollow();
 
   const handleTabChange = (tab) => {
     setActiveTab(tab);
@@ -70,9 +71,13 @@ const Profile = () => {
                       Ad tools
                     </Button>
                   </>
-                ) : follow ? (
+                ) : userProfile?.followers?.includes(user?._id) ? (
                   <>
-                    <Button variant={"secondary"} className="h-8 ">
+                    <Button
+                      variant={"secondary"}
+                      className="h-8 "
+                      onClick={() => handleFollowUnfollow(userProfile?._id)}
+                    >
                       Unfollow
                     </Button>
                     <Button variant={"secondary"} className=" h-8 ">
@@ -80,7 +85,10 @@ const Profile = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button className="bg-[#0095F6] hover:bg-[#3192d2] h-8 ">
+                  <Button
+                    className="bg-[#0095F6] hover:bg-[#3192d2] h-8 "
+                    onClick={() => handleFollowUnfollow(userProfile?._id)}
+                  >
                     Follow
                   </Button>
                 )}

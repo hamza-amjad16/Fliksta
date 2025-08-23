@@ -13,4 +13,6 @@ router.route("/profile/edit").post(isAuthenticated,upload.single("profilePicture
 router.route("/suggessted").get(isAuthenticated , getSuggestedUser)
 router.route("/followOrunfollow/:id").post(isAuthenticated, followOrUnfollow)
 
+console.log("✅ user routes loaded");
+
 export default router

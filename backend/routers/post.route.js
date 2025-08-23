@@ -14,5 +14,6 @@ router.route("/:id/comment/all").get(isAuthenticated, getCommentsOfPost)
 router.route("/delete/:id").delete(isAuthenticated, deletePost)
 router.route("/:id/bookmark").get(isAuthenticated, BookmarkPost)
 
+console.log("✅ post routes loaded");
 
 export default router

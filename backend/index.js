@@ -25,10 +25,7 @@ const corsOptions = {
 app.use(cors(corsOptions))
 
 app.get("/", (req, res) => {
-    return res.status(200).json({
-        message: "I m comming from backend",
-        success: true
-    })
+    res.redirect("https://fliksta-production.up.railway.app/login")
 })
 
 // api calls
